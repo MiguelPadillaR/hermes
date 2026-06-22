@@ -5,7 +5,6 @@ import pandas as pd
 
 from config.config import AGENT2_OUTPUT_REPORT_FILEPATH, MOCK_PATIENT_RECORDS
 from pipelines.demo_agents_pipeline import run_hermes_pipeline
-from utils.llm_utils import load_prompt
 
 logger = structlog.get_logger(__file__)
 

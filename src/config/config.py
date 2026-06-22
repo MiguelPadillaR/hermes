@@ -17,10 +17,34 @@ CONFIG_DIR = ROOT_DIR / "config"
 REPORTS_DIR = ROOT_DIR / "reports"
 
 AGENT1_SYSTEM_PROMPT_FILEPATH = ASSETS_DIR / "agent1" / "SYSTEM.md"
+AGENT1_MAPPING_PROMPT_FILEPATH = ASSETS_DIR / "agent1" / "MAPPING.md"
 AGENT2_SYSTEM_PROMPT_FILEPATH = ASSETS_DIR / "agent2" / "SYSTEM.md"
 
 AGENT1_OUTPUT_REPORT_FILEPATH = REPORTS_DIR / "agent1_report.md"
 AGENT2_OUTPUT_REPORT_FILEPATH = REPORTS_DIR / "agent2_report.md"
+
+# REPORTING
+REPORT_TEMPLATE = """# HERMES Pre-Visit Clinical Report
+
+## Core Biomarkers & Vital Signs
+- **Vein Pressure:** {vein_pressure}
+- **Heart Rate:** {heart_rate}
+- **Temperature:** {temperature}
+- **Arterial Pressure:** {arterial_pressure}
+- **Oxygen Saturation:** {oxygen_saturation}
+- **Pain Level:** {pain_level}
+- **Blood Sugar:** {blood_sugar}
+"""
+
+TARGET_UNITS = {
+    "vein_pressure": "cmH2O",
+    "heart_rate": "bpm",
+    "temperature": "°C",
+    "arterial_pressure": "cmH2O",  # Adjusted to match your hospital's specific data schema
+    "oxygen_saturation": "%",
+    "pain_level": "/10",
+    "blood_sugar": "mg/dl"
+}
 
 # MOCK DATA (REMOVE)
 MOCK_PATIENT_RECORDS = {
