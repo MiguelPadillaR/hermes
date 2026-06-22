@@ -5,7 +5,15 @@ import pandas as pd
 
 from openai import OpenAI
 
-from config.config import AGENT1_SYSTEM_PROMPT_FILEPATH, AGENT2_OUTPUT_REPORT_FILEPATH, AGENT2_SYSTEM_PROMPT_FILEPATH, LLM_API_KEY, LLM_BASE_URL, LLM_MODEL_NAME, MOCK_KNOWLEDGE_BASE, MOCK_PATIENT_RECORDS
+from config.config import (
+    AGENT1_SYSTEM_PROMPT_FILEPATH,
+    AGENT2_OUTPUT_REPORT_FILEPATH,
+    AGENT2_SYSTEM_PROMPT_FILEPATH,
+    LLM_API_KEY, LLM_BASE_URL,
+    LLM_MODEL_NAME,
+    MOCK_KNOWLEDGE_BASE,
+    MOCK_PATIENT_RECORDS
+    )
 from utils.llm_utils import load_prompt
 
 logger = structlog.get_logger(__file__)
@@ -25,7 +33,6 @@ df_patients = pd.DataFrame(MOCK_PATIENT_RECORDS)
 def run_hermes_pipeline(patient_row: pd.Series):
     # Load system prompts dynamically
     agent_1_sys = load_prompt(AGENT1_SYSTEM_PROMPT_FILEPATH)
-    agent_2_sys = load_prompt(AGENT2_SYSTEM_PROMPT_FILEPATH)
     
     patient_dict = patient_row.to_dict()
     diagnosis = patient_dict['Primary_Diagnosis']
@@ -57,6 +64,8 @@ def run_hermes_pipeline(patient_row: pd.Series):
     # ----------------------------------------------------
     # STEP 2: Mock RAG / Knowledge Base Retrieval
     # ----------------------------------------------------
+    agent_2_sys = load_prompt(AGENT2_SYSTEM_PROMPT_FILEPATH)
+    
     logger.info("🔍 Performing RAG Search: Checking internal medical database...")
     # Get protocol if it exists, otherwise fall back to a default empty string context
     retrieved_protocol = MOCK_KNOWLEDGE_BASE.get(
@@ -87,8 +96,7 @@ def run_hermes_pipeline(patient_row: pd.Series):
     final_combined_report = f"{agent_1_output}\n\n{agent_2_output}"
     return final_combined_report
 
-
-# 6. RUN THE PIPELINE
+# 4. RUN THE PIPELINE
 if __name__ == "__main__":
     # Select a completely random record from the dataset
     random_idx = random.randint(0, len(df_patients) - 1)
