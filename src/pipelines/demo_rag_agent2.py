@@ -7,20 +7,14 @@ from config.config import (
     AGENT1_OUTPUT_REPORT_FILEPATH,
     AGENT2_OUTPUT_REPORT_FILEPATH,
     AGENT2_SYSTEM_PROMPT_FILEPATH,
-    HERMES_DB_PATH,
-    LLM_API_KEY, LLM_BASE_URL,
     LLM_MODEL_NAME,
     )
-from utils.llm_utils import load_prompt, seed_demo_knowledge_base
+from utils.llm_utils import init_client, load_prompt, seed_demo_knowledge_base
 
 logger = structlog.get_logger()
 
 # --- CONFIGURATION ---
-client = OpenAI(
-    base_url=LLM_BASE_URL,
-    api_key=LLM_API_KEY
-)
-
+client = init_client()
 MODEL_NAME =  LLM_MODEL_NAME
 
 # --- THE AGENT #2 EXECUTION LOGIC ---

@@ -9,22 +9,18 @@ from openai import OpenAI
 from config.config import (
     AGENT1_MAPPING_PROMPT_FILEPATH,
     AGENT1_OUTPUT_REPORT_FILEPATH,
-    LLM_API_KEY, LLM_BASE_URL,
     LLM_MODEL_NAME,
     REPORT_TEMPLATE,
     TARGET_UNITS
     )
 
+from utils.llm_utils import init_client
 from utils.dataset_utils import load_mimic_dataset, load_mock_dataset
 
 logger = structlog.get_logger(__file__)
 
 # 1. CORE API CONFIGURATION
-client = OpenAI(
-    base_url=LLM_BASE_URL,
-    api_key=LLM_API_KEY
-)
-
+client = init_client()
 MODEL_NAME =  LLM_MODEL_NAME
 
 def run_mapping_pipeline(raw_data: pd.Series):
