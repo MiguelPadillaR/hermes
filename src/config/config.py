@@ -15,6 +15,7 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 ASSETS_DIR = ROOT_DIR / "assets"
 CONFIG_DIR = ROOT_DIR / "config"
 REPORTS_DIR = ROOT_DIR / "reports"
+HERMES_DB_PATH = ROOT_DIR / "hermes_vector_db"
 
 AGENT1_SYSTEM_PROMPT_FILEPATH = ASSETS_DIR / "agent1" / "SYSTEM.md"
 AGENT1_MAPPING_PROMPT_FILEPATH = ASSETS_DIR / "agent1" / "MAPPING.md"

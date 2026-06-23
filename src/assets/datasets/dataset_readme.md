@@ -15,7 +15,7 @@
 
 ### Losses
 - NGP nasalgastric_probe (ml/h)
-- D depositions (integer, times a day)
+- D deposition_breaks (integer, times a day)
 - SD spontaneus_diuresis (ml)
 - VPro vesicular_probe (ml)
 - DL diaper_loss (ml)

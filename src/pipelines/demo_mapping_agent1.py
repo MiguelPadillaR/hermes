@@ -16,7 +16,6 @@ from config.config import (
     )
 
 from utils.dataset_utils import load_mimic_dataset, load_mock_dataset
-from utils.llm_utils import load_prompt
 
 logger = structlog.get_logger(__file__)
 
@@ -28,7 +27,7 @@ client = OpenAI(
 
 MODEL_NAME =  LLM_MODEL_NAME
 
-def run_mapping_test(raw_data: pd.Series):
+def run_mapping_pipeline(raw_data: pd.Series):
     with open(AGENT1_MAPPING_PROMPT_FILEPATH, "r", encoding="utf-8") as f:
         sys_prompt = f.read()
 
@@ -125,7 +124,7 @@ if __name__ == "__main__":
     # }
 
 
-    pre_report = run_mapping_test(mimic_incoming_row)
+    pre_report = run_mapping_pipeline(mimic_incoming_row)
     
     logger.info("\n================== AGENT 1 PRE-REPORT OUTPUT ==================")
     logger.info(pre_report)
