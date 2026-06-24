@@ -4,8 +4,6 @@ import structlog
 
 import pandas as pd
 
-from openai import OpenAI
-
 from config.config import (
     AGENT1_MAPPING_PROMPT_FILEPATH,
     AGENT1_OUTPUT_REPORT_FILEPATH,
@@ -102,23 +100,10 @@ def build_pre_report(row_data: dict, mapping: dict, template: str = REPORT_TEMPL
     return final_report
 
 if __name__ == "__main__":
-    # df = load_mimic_dataset()
-    df = load_mock_dataset()
+    df = load_mimic_dataset()
+    # df = load_mock_dataset()
     random_idx = random.randint(0, len(df) - 1)
     mimic_incoming_row = df.iloc[random_idx]
-
-    # mimic_incoming_row = {
-    #     "subject_id": 10005817,
-    #     "charttime": "2132-12-15 20:15:00",
-    #     "heartrate": 88,            # Matches target: heart_rate
-    #     "sbp": 122,                 # Arterial Systolic Pressure -> Matches target
-    #     "dbp": 74,                  # Arterial Diastolic Pressure -> Matches target
-    #     "spo2": 96,                 # Matches target: oxygen_saturation
-    #     "temperature_f": 98.6,      # Matches target: skin_temperature (but in Fahrenheit!)
-    #     "glucose_infusion_rate": 4.5, # Leftover: Highly relevant clinical context!
-    #     "caregiver_signature_id": 928, # Leftover: Administrative metadata (Not clinically relevant)
-    # }
-
 
     pre_report = run_mapping_pipeline(mimic_incoming_row)
     

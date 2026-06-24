@@ -35,7 +35,7 @@ def run_rag_pipeline():
     
     # Setup our local mock vector base collection
     collection = seed_demo_knowledge_base()
-    
+
     # BEST PRACTICE #2: Targeted Search Extraction
     # Instead of blindly throwing the whole report at the vector database, we pull the diagnostic indicator
     # For demo automation, we scan for the diagnosis or let the text query look for contextual terms.
