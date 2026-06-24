@@ -16,56 +16,112 @@ def load_mimic_dataset():
     df = pd.read_csv(df_filepath)
 
     vitals_map = {
-        220045: 'heart_rate',
-        220179: 'sbp',
-        220180: 'dbp',
-        220210: 'resp_rate',
-        220277: 'spo2',
-        223761: 'temp_f', # Temperature Fahrenheit
-        223762: 'temp_c'  # Temperature Celsius
+        # -- CORE VITALS ---
+        220045: 'heart_rate',          # Heart Rate (bpm)
+        220210: 'resp_rate',           # Respiratory Rate (breaths/min)
+        224690: 'resp_rate_total',     # Respiratory Rate Total (Ventilator + Spontaneous)
+        220277: 'spo2',                # Pulse Oximetry Peripheral Oxygen Saturation (%)
+        223761: 'temp_f',              # Temperature Fahrenheit
+        223762: 'temp_c',              # Temperature Celsius
+
+        # --- NON-INVASIVE BLOOD PRESSURE (NIBP) ---
+        220179: 'sbp_non_invasive',    # Non-Invasive Systolic Blood Pressure (mmHg)
+        220180: 'dbp_non_invasive',    # Non-Invasive Diastolic Blood Pressure (mmHg)
+        220181: 'mbp_non_invasive',    # Non-Invasive Mean Blood Pressure (mmHg)
+
+        # --- INVASIVE ARTERIAL BLOOD PRESSURE (ABP line) ---
+        220050: 'sbp_invasive',        # Arterial Blood Pressure Systolic (mmHg)
+        220051: 'dbp_invasive',        # Arterial Blood Pressure Diastolic (mmHg)
+        220052: 'mbp_invasive',        # Arterial Blood Pressure Mean (mmHg)
+
+        # --- VEIN & CENTRAL PRESSURES ---
+        220074: 'vein_pressure',       # Central Venous Pressure / CVP (mmHg or cmH2O)
+        220059: 'pulmonary_art_sbp',   # Pulmonary Artery Systolic Pressure
+        220060: 'pulmonary_art_dbp',   # Pulmonary Artery Diastolic Pressure
+
+        # --- METABOLIC / BLOOD SUGAR ---
+        225664: 'blood_sugar_finger',  # Glucose Fingerstick (mg/dL)
+        220621: 'blood_sugar_serum',   # Glucose Serum (mg/dL)
+        226537: 'blood_sugar_blood',   # Glucose Whole Blood (mg/dL)
+
+        # --- NEUROLOGICAL & PAIN SCALES ---
+        223791: 'pain_level_score',    # Pain Level/Score (Visual Analog / Numeric Scale 0-10)
+        224409: 'pain_assessment',     # Critical-Care Pain Observation Tool (CPOT)
+        223900: 'gcs_verbal',          # Glasgow Coma Scale - Verbal Response
+        223901: 'gcs_motor',           # Glasgow Coma Scale - Motor Response
+        223902: 'gcs_eyes'             # Glasgow Coma Scale - Eye Opening
     }
-    logger.debug(f"DF Columns: {df.columns}")
-    # Filter
+# Filter data
     vitals_df = df[df['itemid'].isin(vitals_map.keys())].copy()
     vitals_df['vital_name'] = vitals_df['itemid'].map(vitals_map)
 
-    # Pivot
+    # Pivot data
     vitals_pivot = vitals_df.pivot_table(
         index=['subject_id', 'hadm_id', 'stay_id', 'charttime', 'valueuom'],
         columns='vital_name',
         values='valuenum'
     ).reset_index()
 
-    # --- FIX TEMPERATURE ---
-    # 1. If temp_c is missing but temp_f exists, convert F to C
-    if 'temp_f' in vitals_pivot.columns:
-        # Formula: (F - 32) * 5/9
-        f_to_c = (vitals_pivot['temp_f'] - 32) * 5/9
-        
-        # Fill missing Celsius values with converted Fahrenheit values
-        if 'temp_c' not in vitals_pivot.columns:
-            vitals_pivot['temp_c'] = f_to_c
-        else:
-            vitals_pivot['temp_c'] = vitals_pivot['temp_c'].fillna(f_to_c)
-        
-        # Drop temp_f as we don't need it anymore
-        vitals_pivot = vitals_pivot.drop(columns=['temp_f'])
+    # Ensure all expected columns exist in the pivot table ---
+    expected_columns = set(vitals_map.values())
+    for col in expected_columns:
+        if col not in vitals_pivot.columns:
+            vitals_pivot[col] = np.nan
 
-    # --- ENSURE TEMP_C EXISTS ---
-    if 'temp_c' not in vitals_pivot.columns:
-        vitals_pivot['temp_c'] = np.nan
-    
+    # --- FIX TEMPERATURE ---
+    # Convert F to C if C is missing
+    f_to_c = (vitals_pivot['temp_f'] - 32) * 5/9
+    vitals_pivot['temp_c'] = vitals_pivot['temp_c'].fillna(f_to_c)
+    vitals_pivot = vitals_pivot.drop(columns=['temp_f'])
+
+    # --- CONSOLIDATE REPETITIVE CLINICAL CONCEPTS ---
+    # 1. Blood Pressure: Prioritize invasive arterial line readings, fall back to non-invasive cuffs
+    vitals_pivot['sbp'] = vitals_pivot['sbp_invasive'].fillna(vitals_pivot['sbp_non_invasive'])
+    vitals_pivot['dbp'] = vitals_pivot['dbp_invasive'].fillna(vitals_pivot['dbp_non_invasive'])
+    vitals_pivot['mbp'] = vitals_pivot['mbp_invasive'].fillna(vitals_pivot['mbp_non_invasive'])
+
+    # 2. Blood Sugar: Combine fingerstick metrics with serum or whole blood lab readings
+    vitals_pivot['blood_sugar'] = (
+        vitals_pivot['blood_sugar_finger']
+        .fillna(vitals_pivot['blood_sugar_serum'])
+        .fillna(vitals_pivot['blood_sugar_blood'])
+    )
+
+    # Clean up the pre-consolidated structural columns to keep the data clean
+    columns_to_drop = [
+        'sbp_invasive', 'sbp_non_invasive', 
+        'dbp_invasive', 'dbp_non_invasive', 
+        'mbp_invasive', 'mbp_non_invasive',
+        'blood_sugar_finger', 'blood_sugar_serum', 'blood_sugar_blood'
+    ]
+    vitals_pivot = vitals_pivot.drop(columns=columns_to_drop)
+
+    # --- AGGREGATION PATTERN ---
+    # We now group by patient ICU stay and collect the latest/first available entries
+    aggregation_schema = {
+        'heart_rate': 'last',
+        'resp_rate': 'last',
+        'resp_rate_total': 'last',
+        'spo2': 'last',
+        'temp_c': 'last',
+        'sbp': 'last',
+        'dbp': 'last',
+        'mbp': 'last',
+        'vein_pressure': 'last',
+        'pulmonary_art_sbp': 'last',
+        'pulmonary_art_dbp': 'last',
+        'blood_sugar': 'last',
+        'pain_level_score': 'last',
+        'pain_assessment': 'last',
+        'gcs_verbal': 'last',
+        'gcs_motor': 'last',
+        'gcs_eyes': 'last'
+    }
+
     df = (
         vitals_pivot
         .groupby(['subject_id', 'hadm_id', 'stay_id'])
-        .agg({
-            'heart_rate': 'first',
-            'sbp': 'first',
-            'dbp': 'first',
-            'resp_rate': 'first',
-            'spo2': 'first',
-            'temp_c': 'first'
-        })
+        .agg(aggregation_schema)
         .reset_index()
     )
 
