@@ -146,4 +146,3 @@ def load_mock_dataset():
     logger.debug(f"DF cols:\n{df.columns}")
 
     return df
-
