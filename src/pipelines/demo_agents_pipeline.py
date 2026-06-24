@@ -14,17 +14,14 @@ from config.config import (
     MOCK_KNOWLEDGE_BASE,
     MOCK_PATIENT_RECORDS
     )
-from utils.llm_utils import load_prompt
+from utils.llm_utils import init_client, load_prompt
 
 logger = structlog.get_logger(__file__)
 
 # 1. CORE API CONFIGURATION
-client = OpenAI(
-    base_url=LLM_BASE_URL,
-    api_key=LLM_API_KEY
-)
-
+client = init_client()
 MODEL_NAME =  LLM_MODEL_NAME
+
 
 # 2. MOCK PATIENT RECORDS INGESTION
 df_patients = pd.DataFrame(MOCK_PATIENT_RECORDS)
