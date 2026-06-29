@@ -63,6 +63,8 @@ def enrich_with_rag(pre_report_content: str):
     )
 
     # Return final report
+    logger.info("✅ Successfully generated RAG-enriched final report!")
+
     final_enriched_report = response.choices[0].message.content
     return final_enriched_report
 
