@@ -3,17 +3,15 @@ import structlog
 
 import pandas as pd
 
-from openai import OpenAI
-
 from config.config import (
     AGENT1_SYSTEM_PROMPT_FILEPATH,
     AGENT2_OUTPUT_REPORT_FILEPATH,
     AGENT2_SYSTEM_PROMPT_FILEPATH,
-    LLM_API_KEY, LLM_BASE_URL,
     LLM_MODEL_NAME,
     MOCK_KNOWLEDGE_BASE,
     MOCK_PATIENT_RECORDS
     )
+
 from utils.llm_utils import init_client, load_prompt
 
 logger = structlog.get_logger(__file__)
@@ -21,7 +19,6 @@ logger = structlog.get_logger(__file__)
 # 1. CORE API CONFIGURATION
 client = init_client()
 MODEL_NAME =  LLM_MODEL_NAME
-
 
 # 2. MOCK PATIENT RECORDS INGESTION
 df_patients = pd.DataFrame(MOCK_PATIENT_RECORDS)

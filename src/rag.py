@@ -1,7 +1,4 @@
-import os
 import structlog
-
-from openai import OpenAI
 
 from config.config import (
     AGENT1_OUTPUT_REPORT_FILEPATH,
@@ -9,7 +6,8 @@ from config.config import (
     AGENT2_SYSTEM_PROMPT_FILEPATH,
     LLM_MODEL_NAME,
     )
-from utils.llm_utils import init_client, load_prompt, seed_demo_knowledge_base
+from utils.llm_utils import init_client, load_prompt
+from utils.rag_utils import get_knowledge_base
 
 logger = structlog.get_logger()
 
@@ -19,22 +17,18 @@ MODEL_NAME =  LLM_MODEL_NAME
 
 # --- THE AGENT #2 EXECUTION LOGIC ---
 
-def run_rag_pipeline():
+def enrich_with_rag(pre_report_content: str):
     """
     Reads the generated report output from Agent 1, queries the vector database 
     using context metrics, and enriches it with concrete protocol guidelines.
-    """
-    logger.info(f"📖 Reading input report from: {AGENT1_OUTPUT_REPORT_FILEPATH}")
-    if not os.path.exists(AGENT1_OUTPUT_REPORT_FILEPATH):
-        fe = FileNotFoundError(f"No pre-report file found at {AGENT1_OUTPUT_REPORT_FILEPATH}. Run Agent 1 first.")
-        logger.error(fe)
-        raise fe
+    Args:
+        pre_report_content (str): The filled-out target schema with the added section.
+    Returns:
+        final_enriched_report (str): The final enriched report to present.
         
-    with open(AGENT1_OUTPUT_REPORT_FILEPATH, "r", encoding="utf-8") as f:
-        pre_report_content = f.read()
-    
+    """
     # Setup our local mock vector base collection
-    collection = seed_demo_knowledge_base()
+    collection = get_knowledge_base()
 
     # BEST PRACTICE #2: Targeted Search Extraction
     # Instead of blindly throwing the whole report at the vector database, we pull the diagnostic indicator
@@ -68,22 +62,18 @@ def run_rag_pipeline():
         temperature=0.2
     )
 
+    # Return final report
     final_enriched_report = response.choices[0].message.content
-    
-    # Save the polished output file
-    with open(AGENT2_OUTPUT_REPORT_FILEPATH, "w", encoding="utf-8") as f:
-        f.write(final_enriched_report)
-        
-    logger.info(f"\n🎉 SUCCESS: Final Enriched Medical Report generated at '{AGENT2_OUTPUT_REPORT_FILEPATH}'")
     return final_enriched_report
 
 
 if __name__ == "__main__":
-
     # Execute Agent 2's isolated pipeline run
     # This expects the file 'pre_report.md' generated deterministically by your Python script wrapper
+    with open(AGENT1_OUTPUT_REPORT_FILEPATH, 'r') as file:
+        pre_report = file.read()
     try:
-        final_report = run_rag_pipeline()
+        final_report = enrich_with_rag(pre_report)
         logger.info("\n======================= OUTPUT PREVIEW =======================")
         logger.info(final_report[:500] + "\n\n[... Remaining Report Content Saved To Disk ...]")
     except FileNotFoundError as e:

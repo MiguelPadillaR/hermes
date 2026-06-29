@@ -21,16 +21,25 @@ logger = structlog.get_logger(__file__)
 client = init_client()
 MODEL_NAME =  LLM_MODEL_NAME
 
-def run_mapping_pipeline(raw_data: pd.Series):
+def map_and_generate_pre_report(patient_row_data: pd.Series):
+    """
+    Provided patient clinical data, the LLM maps the keys & values semantically to target schema.
+    It also takes any extra keys and generated an Additional Contextual Metrics section with them.
+    Args:
+        patient_row_data (pd.Series): Patient row from clinical dataframe.
+    Returns:
+        pre_report (str): The filled-out target schema with the added section.
+    """
     with open(AGENT1_MAPPING_PROMPT_FILEPATH, "r", encoding="utf-8") as f:
         sys_prompt = f.read()
 
-    # We format the payload showing the model the raw keys and the values
-    raw_data = raw_data.to_dict()
-    logger.info(f"RAW DATA:\n{raw_data}")
+    # Generate payload with raw keys and values
+    if not isinstance(patient_row_data, dict):
+        patient_row_data = patient_row_data.to_dict()
+    logger.info(f"RAW DATA:\n{patient_row_data}")
     user_payload = (
         f"--- INCOMING DATA FOR DYNAMIC MAPPING ---\n"
-        f"Incoming Columns & Values:\n{json.dumps(raw_data, indent=2)}\n"
+        f"Incoming Columns & Values:\n{json.dumps(patient_row_data, indent=2)}\n"
     )
 
     logger.info("🤖 HERMES is analyzing columns and generating the pre-report...")
@@ -40,7 +49,7 @@ def run_mapping_pipeline(raw_data: pd.Series):
             {"role": "system", "content": sys_prompt},
             {"role": "user", "content": user_payload}
         ],
-        temperature=0.1 # Keep it strictly deterministic
+        temperature=0.2 # Keep it strictly deterministic
     )
     
     raw_llm_response = response.choices[0].message.content
@@ -72,18 +81,28 @@ def run_mapping_pipeline(raw_data: pd.Series):
     logger.info("\nMarkdown Fragment for Pre-Report:")
     logger.info(additional_context)
     
-    return build_pre_report(raw_data, mapped_columns, extra_metrics=additional_context)
+    # Build and return report
+    pre_report = build_pre_report(patient_row_data, mapped_columns, extra_metrics=additional_context)
+    return pre_report
 
-def build_pre_report(row_data: dict, mapping: dict, template: str = REPORT_TEMPLATE, extra_metrics: str = "") -> str:
+def build_pre_report(patient_row_data: dict, mapped_columns: dict, template: str = REPORT_TEMPLATE, extra_metrics: str = "") -> str:
     """
     Looks up mapped column names in the raw data row. If a target key 
     points to None, it defaults to 'Unreported'. Then substitutes placeholders.
+    Args:
+        patient_row_data (dict): Patient row from clinical dataframe.
+        mapped_columns (dict): Dict with the patien data keys matched to the target schema keys.
+        template (str): Pre-report schema template.
+        extra_metrics (str): Any additional key-values detected in the patient data to add to the report
+    Returns:
+        pre_report (str): The filled-out target schema with the added section.
+
     """
     templated_values = {}
     
-    for target_key, incoming_column in mapping.items():
-        if incoming_column and incoming_column in row_data:
-            raw_value = row_data[incoming_column]
+    for target_key, incoming_column in mapped_columns.items():
+        if incoming_column and incoming_column in patient_row_data:
+            raw_value = patient_row_data[incoming_column]
             unit = TARGET_UNITS.get(target_key, "")
             
             # Grab actual value from the raw dataset row
@@ -96,21 +115,21 @@ def build_pre_report(row_data: dict, mapping: dict, template: str = REPORT_TEMPL
     rendered_base = template.format(**templated_values)
     
     # Append the additional markdown block safely
-    final_report = f"{rendered_base}\n{extra_metrics}"
-    return final_report
+    pre_report = f"{rendered_base}\n{extra_metrics}"
+    return pre_report
 
 if __name__ == "__main__":
     df = load_mimic_dataset()
     # df = load_mock_dataset()
     random_idx = random.randint(0, len(df) - 1)
-    mimic_incoming_row = df.iloc[random_idx]
+    patient_row_data = df.iloc[random_idx]
 
-    pre_report = run_mapping_pipeline(mimic_incoming_row)
+    pre_report = map_and_generate_pre_report(patient_row_data)
     
     logger.info("\n================== AGENT 1 PRE-REPORT OUTPUT ==================")
     logger.info(pre_report)
     logger.info("===============================================================")
     
-    # Save the file out so Agent 2 can grab it next
+    # Save pre-report to file
     with open(AGENT1_OUTPUT_REPORT_FILEPATH, "w", encoding="utf-8") as f:
         f.write(pre_report)
