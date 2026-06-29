@@ -1,5 +1,5 @@
 # Health Report & Monitoring System (HeRMeS)
-The Health Report & Monitoring System (HeRMeS) is a LLM-based pipeline that monitors patient status, evaluates current helath conditions, and relays an overall review to healthcare professionals before visitations. It is specifically aimed to transform machine-friendly files (`.csv`) to a fully fledged medical report.
+The Health Report & Monitoring System (HeRMeS) is a LLM-based pipeline that monitors patient status, evaluates current health conditions, and relays an overall review to healthcare professionals before visitations. It is specifically aimed to transform machine-friendly files (`.csv`) to a fully fledged medical report.
 
 ## Installation & Setup
 - Clone and enter the repo:
