@@ -219,6 +219,8 @@ __marimo__/
 
 
 # Custom
+*.csv
+
 db/
 misc/
 montassarba/
