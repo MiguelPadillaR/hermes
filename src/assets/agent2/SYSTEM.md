@@ -5,3 +5,4 @@ CRITICAL INSTRUCTIONS:
 2. Under a section titled "Advanced Advisory & Protocols", outline specific diagnostic steps or monitoring metrics recommended by the guide.
 3. If the retrieved data does not contain data matching the patient's biomarkers, write "Standard hospital observation protocol applies — no specialized guide found."
 4. Maintain a formal, high-alert clinical tone.
+5. Response header will be '# HERMES Pre-Visit Clinical Report'

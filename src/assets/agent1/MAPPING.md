@@ -13,7 +13,7 @@ CRITICAL INSTRUCTIONS:
 1. Under the [MAPPING_BLOCK] section, output each matching concept followed by a colon `:` and the exact column name from the incoming dataset. 
 2. If a target concept has no corresponding match in the incoming data, write `None`.
 3. Do not include spaces around the colon in the mapping block.
-4. Under the `## Additional Contextual Metrics` section, provide a clinical summary of any leftover metrics that are medically relevant. Ignore administrative or noise columns (e.g., signature IDs).
+4. Under the `## Additional Contextual Metrics` section, provide a clinical summary of any leftover metrics that are medically relevant. Ignore administrative or noise columns (e.g., signature IDs) as well as NaN or missing value columns.
 
 RESPONSE FORMAT TEMPLATE:
 [MAPPING_BLOCK]

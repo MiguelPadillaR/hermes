@@ -1,17 +1,26 @@
+from io import BytesIO
 import os
 import structlog
 
 import numpy as np
 import pandas as pd
 
-from config.config import ASSETS_DIR
+from config.config import DATASETS_DIR
 
 logger = structlog.get_logger()
 
-def load_mimic_dataset():
+def load_mimic_dataset() ->pd.DataFrame:
+    """
+    Loads and processes the MIMIC-IV ICU dataset.
+    Processing takes the vitals' values for each patient, translates them from ID to str, makes them the new DF columns and copies the values in them.
+    Patients are rows and vitasl are columns.
+    Only most recent values for each vital are used.
+    Returns:
+        df (pd.DataFrame): Processed MIMIC dataframe. 
+    """
     logger.info(f"Selected MIMIC-IV ICU dataset.")
     
-    base_path = ASSETS_DIR / 'datasets/montassarba/mimic-iv-clinical-database-demo-2-2/mimic-iv-clinical-database-demo-2.2'
+    base_path = DATASETS_DIR / 'montassarba/mimic-iv-clinical-database-demo-2-2/mimic-iv-clinical-database-demo-2.2'
     df_filepath = f'{base_path}/icu/chartevents.csv'
     df = pd.read_csv(df_filepath)
 
@@ -131,13 +140,22 @@ def load_mimic_dataset():
     logger.debug(f"DF summary:\n{df.describe()}")
     logger.debug(f"DF cols:\n{df.columns}")
 
+    # UNCOMMENT IF YOU NEED THE PROCESSED MIMIC DF FILE
+    # df.to_csv(DATASETS_DIR / 'clean_mimic.csv')
+
     return df
 
-def load_mock_dataset():
+def load_mock_dataset()->pd.DataFrame:
+    """
+    Loads the artifically generated test dataframe
+    Patients are rows, vitals are columns.
+    Returns:
+        df (pd.DataFrame): Processed MIMIC dataframe. 
+    """
     logger.info(f"Selected MOCK dataset.")
     
-    df_filepath = ASSETS_DIR / 'datasets/mock_dataset.csv'
-    df = pd.read_csv(ASSETS_DIR / 'datasets/mock_dataset.csv')
+    df_filepath = DATASETS_DIR / 'mock_dataset.csv'
+    df = pd.read_csv(df_filepath)
     
     logger.info(f"Unique patients retrieved: {len(df['Patient_ID'].unique())}")
     logger.debug(f"Chosen dataset: {os.path.basename(str(df_filepath)).upper()}")
@@ -146,3 +164,25 @@ def load_mock_dataset():
     logger.debug(f"DF cols:\n{df.columns}")
 
     return df
+
+def load_dataset(uploaded_file: str)->pd.DataFrame:
+    """
+    Loads the dataframe from CSV file
+    Patients must be rows, vitals must be columns.
+    Args:
+        uploaded_file (str): File path to CSV. 
+    Returns:
+        df (pd.DataFrame): Processed MIMIC dataframe. 
+    """
+    uploaded_file.seek(0)
+
+    df = pd.read_csv(BytesIO(uploaded_file.getvalue()))
+    
+    logger.debug(f"DF head:\n{df.head()}")
+    logger.debug(f"DF summary:\n{df.describe()}")
+    logger.debug(f"DF cols:\n{df.columns}")
+
+    return df
+
+if __name__ == "__main__":
+    df = load_mimic_dataset()

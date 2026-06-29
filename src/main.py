@@ -4,14 +4,17 @@ import structlog
 from config.config import AGENT1_OUTPUT_REPORT_FILEPATH, AGENT2_OUTPUT_REPORT_FILEPATH
 from mapping import map_and_generate_pre_report
 from rag import enrich_with_rag
-from utils.dataset_utils import load_mimic_dataset, load_mock_dataset
+from utils.dataset_utils import load_dataset, load_mimic_dataset, load_mock_dataset
 
 logger = structlog.get_logger(__file__)
 
-def main(save_report_files: bool = False):
+def main(dataset_filepath: str = None, save_report_files: bool = False):
     # Load selected dataset
-    df = load_mimic_dataset()
-    # df = load_mock_dataset()
+    if dataset_filepath is None:
+        df = load_mimic_dataset()
+        # df = load_mock_dataset()
+    else:
+        df = load_dataset(dataset_filepath)
 
     # Choose random patient row
     random_idx = random.randint(0, len(df) - 1)
