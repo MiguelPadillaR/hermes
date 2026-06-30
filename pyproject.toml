@@ -1,20 +1,22 @@
 [project]
 name = "hermes"
 version = "0.1.0"
-description = "Add your description here"
+description = "The Health Report & Monitoring System (HeRMeS) is a LLM-based pipeline that monitors patient status, evaluates current health conditions, and relays an overall review to healthcare professionals before visitations. It is specifically aimed to transform machine-friendly files (`.csv`) to a fully fledged medical report."
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
     "chromadb",
-    "openpyxl",
     "langchain",
     "langchain-community",
     "langchain-openai",
     "langgraph",
+    "markdown-pdf>=1.13.2",
     "openai",
+    "openpyxl",
     "pandas==2.3.3",
     "pypdf==6.14.0",
     "python-dotenv",
+    "rapidfuzz>=3.14.5",
     "streamlit",
     "structlog",
 ]
