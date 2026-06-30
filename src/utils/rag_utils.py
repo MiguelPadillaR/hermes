@@ -12,33 +12,6 @@ logger = structlog.get_logger(__file__)
 
 
 # --- RAG UTILS ---
-def chunk_document(path: str, chunk_size: int = 1000, chunk_overlap: int = 200):
-    """
-    Read raw protocol text and yield smaller text segments.
-    Args:
-        path (str): The document's filepath.
-        chunk_size (int): The maximum size for each chunk.
-        chunk_overlap (int): The overlap prevents sentences right on the boundaries from being cut in half.
-    Returns:
-        chunked_text_list (list[Document]): Full list of `Document` text chunks.
-    """
-    # Load PDF documents
-    logger.info(f"📖Uploading document: {os.path.basename(path)}")
-    loader = PyPDFLoader(path)
-    documents = loader.load()
-
-    # Split documents into chunks
-    text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=chunk_size, chunk_overlap=chunk_overlap, length_function=len
-    )
-    chunked_text_list = text_splitter.split_documents(documents)
-
-    logger.info(
-        f"✅ Successfuly generated {len(chunked_text_list)} chunks from document!"
-    )
-    return chunked_text_list
-
-
 def get_knowledge_base(reset_database: bool = False):
     """
     Ingest standard medical protocols into our vector database store.
@@ -94,6 +67,33 @@ def get_knowledge_base(reset_database: bool = False):
 
     logger.info("✅ Vector database populated successfully.")
     return collection
+
+
+def chunk_document(path: str, chunk_size: int = 1000, chunk_overlap: int = 200):
+    """
+    Read raw protocol text and yield smaller text segments.
+    Args:
+        path (str): The document's filepath.
+        chunk_size (int): The maximum size for each chunk.
+        chunk_overlap (int): The overlap prevents sentences right on the boundaries from being cut in half.
+    Returns:
+        chunked_text_list (list[Document]): Full list of `Document` text chunks.
+    """
+    # Load PDF documents
+    logger.info(f"📖Uploading document: {os.path.basename(path)}")
+    loader = PyPDFLoader(path)
+    documents = loader.load()
+
+    # Split documents into chunks
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=chunk_size, chunk_overlap=chunk_overlap, length_function=len
+    )
+    chunked_text_list = text_splitter.split_documents(documents)
+
+    logger.info(
+        f"✅ Successfuly generated {len(chunked_text_list)} chunks from document!"
+    )
+    return chunked_text_list
 
 
 if __name__ == "__main__":
