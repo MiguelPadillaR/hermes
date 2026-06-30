@@ -6,9 +6,13 @@ from config.config import FINAL_PDF_FILEPATH
 
 logger = structlog.get_logger()
 
-def download_pdf_report(pre_report: str = None, clinical_report: str = None,):
+
+def download_pdf_report(
+    pre_report: str = None,
+    clinical_report: str = None,
+):
     if pre_report is None and clinical_report is None:
-        logger.warning(f"Aborting PDF generation: No report data provided.")
+        logger.warning("Aborting PDF generation: No report data provided.")
         return
     # Remove title from Clinical Report
     clinical_report = "\n".join(clinical_report.split("\n")[1:])

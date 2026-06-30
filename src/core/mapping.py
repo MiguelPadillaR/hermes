@@ -9,17 +9,18 @@ from config.config import (
     AGENT1_OUTPUT_REPORT_FILEPATH,
     LLM_MODEL_NAME,
     REPORT_TEMPLATE,
-    TARGET_UNITS
-    )
+    TARGET_UNITS,
+)
 
 from utils.llm_utils import init_client
-from utils.dataset_utils import load_mimic_dataset, load_mock_dataset
+from utils.dataset_utils import load_mimic_dataset
 
 logger = structlog.get_logger(__file__)
 
 # 1. CORE API CONFIGURATION
 client = init_client()
-MODEL_NAME =  LLM_MODEL_NAME
+MODEL_NAME = LLM_MODEL_NAME
+
 
 def map_and_generate_pre_report(patient_row_data: pd.Series):
     """
@@ -47,16 +48,20 @@ def map_and_generate_pre_report(patient_row_data: pd.Series):
         model=MODEL_NAME,
         messages=[
             {"role": "system", "content": sys_prompt},
-            {"role": "user", "content": user_payload}
+            {"role": "user", "content": user_payload},
         ],
-        temperature=0.2 # Keep it strictly deterministic
+        temperature=0.2,  # Keep it strictly deterministic
     )
-    
+
     raw_llm_response = response.choices[0].message.content
 
     # 1. Isolate the mapping block explicitly using the boundary tags
     try:
-        mapping_text = raw_llm_response.split("[MAPPING_BLOCK]")[1].split("[/MAPPING_BLOCK]")[0].strip()
+        mapping_text = (
+            raw_llm_response.split("[MAPPING_BLOCK]")[1]
+            .split("[/MAPPING_BLOCK]")[0]
+            .strip()
+        )
         additional_context = raw_llm_response.split("[/MAPPING_BLOCK]")[1].strip()
     except IndexError:
         # Fallback guard clause in case the text format is malformed
@@ -68,11 +73,15 @@ def map_and_generate_pre_report(patient_row_data: pd.Series):
     for line in mapping_text.split("\n"):
         line = line.strip()
         if ":" in line:
-            target_col, incoming_col = line.split(":", 1) # Max split 1 to protect against messy inputs
-            
+            target_col, incoming_col = line.split(
+                ":", 1
+            )  # Max split 1 to protect against messy inputs
+
             # Strip string out values and map to None if missing
             incoming_col = incoming_col.strip()
-            mapped_columns[target_col.strip()] = None if incoming_col == "None" else incoming_col
+            mapped_columns[target_col.strip()] = (
+                None if incoming_col == "None" else incoming_col
+            )
 
     # 3. Validation Check
     logger.info("Deterministic Mapped Columns Dictionary:")
@@ -80,14 +89,22 @@ def map_and_generate_pre_report(patient_row_data: pd.Series):
 
     logger.info("\nMarkdown Fragment for Pre-Report:")
     logger.info(additional_context)
-    
+
     # Build and return report
-    pre_report = build_pre_report(patient_row_data, mapped_columns, extra_metrics=additional_context)
+    pre_report = build_pre_report(
+        patient_row_data, mapped_columns, extra_metrics=additional_context
+    )
     return pre_report
 
-def build_pre_report(patient_row_data: dict, mapped_columns: dict, template: str = REPORT_TEMPLATE, extra_metrics: str = "") -> str:
+
+def build_pre_report(
+    patient_row_data: dict,
+    mapped_columns: dict,
+    template: str = REPORT_TEMPLATE,
+    extra_metrics: str = "",
+) -> str:
     """
-    Looks up mapped column names in the raw data row. If a target key 
+    Looks up mapped column names in the raw data row. If a target key
     points to None, it defaults to 'Unreported'. Then substitutes placeholders.
     Args:
         patient_row_data (dict): Patient row from clinical dataframe.
@@ -99,24 +116,25 @@ def build_pre_report(patient_row_data: dict, mapped_columns: dict, template: str
 
     """
     templated_values = {}
-    
+
     for target_key, incoming_column in mapped_columns.items():
         if incoming_column and incoming_column in patient_row_data:
             raw_value = patient_row_data[incoming_column]
             unit = TARGET_UNITS.get(target_key, "")
-            
+
             # Grab actual value from the raw dataset row
             templated_values[target_key] = f"{raw_value} {unit}".strip()
         else:
             # Safe fallback if column was missing or explicitly mapped to None
             templated_values[target_key] = "Data Unreported"
-            
+
     # Render the base template using dictionary unpacking
     rendered_base = template.format(**templated_values)
-    
+
     # Append the additional markdown block safely
     pre_report = f"{rendered_base}\n{extra_metrics}"
     return pre_report
+
 
 if __name__ == "__main__":
     df = load_mimic_dataset()
@@ -125,11 +143,11 @@ if __name__ == "__main__":
     patient_row_data = df.iloc[random_idx]
 
     pre_report = map_and_generate_pre_report(patient_row_data)
-    
+
     logger.info("\n================== AGENT 1 PRE-REPORT OUTPUT ==================")
     logger.info(pre_report)
     logger.info("===============================================================")
-    
+
     # Save pre-report to file
     with open(AGENT1_OUTPUT_REPORT_FILEPATH, "w", encoding="utf-8") as f:
         f.write(pre_report)
