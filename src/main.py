@@ -4,7 +4,7 @@ import structlog
 from config.config import AGENT1_OUTPUT_REPORT_FILEPATH, AGENT2_OUTPUT_REPORT_FILEPATH
 from core.mapping import map_and_generate_pre_report
 from core.rag import enrich_with_rag
-from core.semantics import verify_dataset_context
+from core.semantics import verify_dataset_clinical_context
 from utils.dataset_utils import load_dataset, load_mimic_dataset, load_mock_dataset
 
 logger = structlog.get_logger(__file__)
@@ -13,7 +13,7 @@ def main(dataset_filepath: str = None, save_report_files: bool = False):
     # Load selected dataset
     if dataset_filepath is None:
         df = load_mimic_dataset()
-        df = load_mock_dataset()
+        # df = load_mock_dataset()
         return
     else:
         df = load_dataset(dataset_filepath)
@@ -23,7 +23,7 @@ def main(dataset_filepath: str = None, save_report_files: bool = False):
     patient_row_data = df.iloc[random_idx]
 
     # Validate dataframe context
-    is_valid_clinical_context = verify_dataset_context(df)
+    is_valid_clinical_context = verify_dataset_clinical_context(df)
     
     if is_valid_clinical_context:
         # Generate reports

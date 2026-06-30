@@ -4,7 +4,7 @@ import structlog
 
 from core.mapping import map_and_generate_pre_report
 from core.rag import enrich_with_rag
-from core.semantics import verify_dataset_context
+from core.semantics import verify_dataset_clinical_context
 
 logger = structlog.get_logger(__file__)
 
@@ -41,7 +41,7 @@ with col1:
         )
         
         # Validate dataframe context
-        is_valid_clinical_context = verify_dataset_context(df)
+        is_valid_clinical_context = verify_dataset_clinical_context(df)
 
         if is_valid_clinical_context:
             # Get the selected row index from dataframe selection

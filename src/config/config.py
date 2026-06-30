@@ -41,11 +41,15 @@ REPORT_TEMPLATE = """# HERMES Pre-Visit Clinical Report
 - **Blood Sugar:** {blood_sugar}
 """
 # Set of clinical terms to search in dataframes to validate input dataframe context
-CLINICAL_REFERENCE_ANCHORS = [
-    "patient vitals electronic medical records, icu chart events, clinical biomarkers, clinical dataset layout",
-    "hospital laboratory results, patient physiological observations, nursing notes abbreviations, diagnostic vitals",
-    "systolic diastolic blood pressure pulse oximetry heart rate temperature respiratory rate glucose measurements"
-]
+CLINICAL_ONTOLOGY_MAP = {
+    "heart_rate": ["hr", "heart rate", "pulse", "bpm", "h_r", "heart_rate", "pulsaciones"],
+    "vein_pressure": ["vp", "cvp", "vein pressure", "central venous pressure", "vein_pres", "presion_venosa"],
+    "temperature": ["temp", "temperature", "t_c", "temp_c", "temp_f", "celsius", "fahrenheit", "temperatura"],
+    "arterial_pressure": ["bp", "sbp", "dbp", "mbp", "abp", "arterial pressure", "blood pressure", "tension"],
+    "oxygen_saturation": ["spo2", "o2", "sat", "oxygen saturation", "sao2", "oximetry", "saturacion"],
+    "pain_level": ["pain", "pain level", "pain score", "cpot", "dolor"],
+    "blood_sugar": ["glucose", "blood sugar", "glu", "glycemia", "glucosa", "fingerstick"]
+}
 
 TARGET_UNITS = {
     "vein_pressure": "cmH2O",
