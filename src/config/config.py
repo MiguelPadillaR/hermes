@@ -40,6 +40,12 @@ REPORT_TEMPLATE = """# HERMES Pre-Visit Clinical Report
 - **Pain Level:** {pain_level}
 - **Blood Sugar:** {blood_sugar}
 """
+# Set of clinical terms to search in dataframes to validate input dataframe context
+CLINICAL_REFERENCE_ANCHORS = [
+    "patient vitals electronic medical records, icu chart events, clinical biomarkers, clinical dataset layout",
+    "hospital laboratory results, patient physiological observations, nursing notes abbreviations, diagnostic vitals",
+    "systolic diastolic blood pressure pulse oximetry heart rate temperature respiratory rate glucose measurements"
+]
 
 TARGET_UNITS = {
     "vein_pressure": "cmH2O",
