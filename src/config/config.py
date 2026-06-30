@@ -6,9 +6,9 @@ from pathlib import Path
 load_dotenv()
 
 # LLM CREDENTIALS & MODEL
-LLM_BASE_URL= os.environ.get("LLM_BASE_URL", "")
-LLM_API_KEY= os.environ.get("LLM_API_KEY", "")
-LLM_MODEL_NAME=os.environ.get("LLM_MODEL_NAME", "")
+LLM_BASE_URL = os.environ.get("LLM_BASE_URL", "")
+LLM_API_KEY = os.environ.get("LLM_API_KEY", "")
+LLM_MODEL_NAME = os.environ.get("LLM_MODEL_NAME", "")
 
 # DIR & FILE PATHS
 ROOT_DIR = Path(__file__).resolve().parent.parent
@@ -44,13 +44,61 @@ REPORT_TEMPLATE = """# HERMES Pre-Visit Clinical Report
 """
 # Set of clinical terms to search in dataframes to validate input dataframe context
 CLINICAL_ONTOLOGY_MAP = {
-    "heart_rate": ["hr", "heart rate", "pulse", "bpm", "h_r", "heart_rate", "pulsaciones"],
-    "vein_pressure": ["vp", "cvp", "vein pressure", "central venous pressure", "vein_pres", "presion_venosa"],
-    "temperature": ["temp", "temperature", "t_c", "temp_c", "temp_f", "celsius", "fahrenheit", "temperatura"],
-    "arterial_pressure": ["bp", "sbp", "dbp", "mbp", "abp", "arterial pressure", "blood pressure", "tension"],
-    "oxygen_saturation": ["spo2", "o2", "sat", "oxygen saturation", "sao2", "oximetry", "saturacion"],
+    "heart_rate": [
+        "hr",
+        "heart rate",
+        "pulse",
+        "bpm",
+        "h_r",
+        "heart_rate",
+        "pulsaciones",
+    ],
+    "vein_pressure": [
+        "vp",
+        "cvp",
+        "vein pressure",
+        "central venous pressure",
+        "vein_pres",
+        "presion_venosa",
+    ],
+    "temperature": [
+        "temp",
+        "temperature",
+        "t_c",
+        "temp_c",
+        "temp_f",
+        "celsius",
+        "fahrenheit",
+        "temperatura",
+    ],
+    "arterial_pressure": [
+        "bp",
+        "sbp",
+        "dbp",
+        "mbp",
+        "abp",
+        "arterial pressure",
+        "blood pressure",
+        "tension",
+    ],
+    "oxygen_saturation": [
+        "spo2",
+        "o2",
+        "sat",
+        "oxygen saturation",
+        "sao2",
+        "oximetry",
+        "saturacion",
+    ],
     "pain_level": ["pain", "pain level", "pain score", "cpot", "dolor"],
-    "blood_sugar": ["glucose", "blood sugar", "glu", "glycemia", "glucosa", "fingerstick"]
+    "blood_sugar": [
+        "glucose",
+        "blood sugar",
+        "glu",
+        "glycemia",
+        "glucosa",
+        "fingerstick",
+    ],
 }
 
 TARGET_UNITS = {
@@ -60,27 +108,33 @@ TARGET_UNITS = {
     "arterial_pressure": "cmH2O",  # Adjusted to match your hospital's specific data schema
     "oxygen_saturation": "%",
     "pain_level": "/10",
-    "blood_sugar": "mg/dl"
+    "blood_sugar": "mg/dl",
 }
 
 # MOCK DATA (REMOVE)
 MOCK_PATIENT_RECORDS = {
     "Patient_ID": ["P-101", "P-102", "P-103", "P-104", "P-105"],
-    "Name": ["Alice Smith", "Bob Jones", "Charlie Brown", "Diana Prince", "Evan Wright"],
+    "Name": [
+        "Alice Smith",
+        "Bob Jones",
+        "Charlie Brown",
+        "Diana Prince",
+        "Evan Wright",
+    ],
     "Age": [45, 67, 34, 29, 82],
     "Primary_Diagnosis": [
-        "Post-Op Appendix Removal", 
+        "Post-Op Appendix Removal",
         "Acute Decompensated Heart Failure",
         "Diabetic Ketoacidosis (DKA)",
         "Severe Migraine / Rule out Hemorrhage",
-        "Community-Acquired Pneumonia"
+        "Community-Acquired Pneumonia",
     ],
     "Vitals_HR_Delta": [
-        "+4 bpm (Stable)", 
-        "+22 bpm (Critical Spike)", 
-        "-12 bpm (Bradycardia observation)", 
-        "+2 bpm (Stable)", 
-        "+18 bpm (Elevated)"
+        "+4 bpm (Stable)",
+        "+22 bpm (Critical Spike)",
+        "-12 bpm (Bradycardia observation)",
+        "+2 bpm (Stable)",
+        "+18 bpm (Elevated)",
     ],
     "Vitals_Temp_Celsius": [36.8, 38.5, 37.1, 36.6, 39.4],
     "Recent_Nurse_Notes": [
@@ -88,8 +142,8 @@ MOCK_PATIENT_RECORDS = {
         "Patient reports shortness of breath when sitting up. Mild wheezing noted during auscultation.",
         "Blood glucose stabilized over last 4 hours. Patient requesting oral fluids.",
         "Photophobia present. Patient resting in a darkened room, pain scores slightly decreasing.",
-        "Productive cough with thick sputum. Oxygen saturation dipping to 92% on room air. Started supplemental O2."
-    ]
+        "Productive cough with thick sputum. Oxygen saturation dipping to 92% on room air. Started supplemental O2.",
+    ],
 }
 MOCK_KNOWLEDGE_BASE = {
     "Acute Decompensated Heart Failure": (
@@ -107,6 +161,5 @@ MOCK_KNOWLEDGE_BASE = {
     "Diabetic Ketoacidosis (DKA)": (
         "Protocol DKA-4: Continuous hourly blood glucose and venous blood gas (VBG) tracking. "
         "Maintain strict insulin infusion protocols alongside electrolyte replacement (specifically Potassium monitoring)."
-    )
+    ),
 }
-
