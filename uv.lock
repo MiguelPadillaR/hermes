@@ -573,7 +573,7 @@ requires-dist = [
     { name = "pandas", specifier = "==2.3.3" },
     { name = "pypdf", specifier = "==6.14.0" },
     { name = "python-dotenv" },
-    { name = "rapidfuzz" },
+    { name = "rapidfuzz", specifier = ">=3.14.5" },
     { name = "streamlit" },
     { name = "structlog" },
 ]

@@ -10,6 +10,7 @@ from config.config import DOCUMENTS_DIR, HERMES_DB_PATH
 
 logger = structlog.get_logger(__file__)
 
+
 # --- RAG UTILS ---
 def chunk_document(path: str, chunk_size: int = 1000, chunk_overlap: int = 200):
     """
@@ -32,8 +33,11 @@ def chunk_document(path: str, chunk_size: int = 1000, chunk_overlap: int = 200):
     )
     chunked_text_list = text_splitter.split_documents(documents)
 
-    logger.info(f"✅ Successfuly generated {len(chunked_text_list)} chunks from document!")
+    logger.info(
+        f"✅ Successfuly generated {len(chunked_text_list)} chunks from document!"
+    )
     return chunked_text_list
+
 
 def get_knowledge_base(reset_database: bool = False):
     """
@@ -43,7 +47,7 @@ def get_knowledge_base(reset_database: bool = False):
         reset_database (bool, optional): If `True`, removes and regenerates vector database.
     """
     logger.info("📦 Seeding vector database knowledge base...")
-    
+
     # --- BEST PRACTICE #1: Standardized Local Embedding & Vector Storage ---
     # We initialize a persistent ChromaDB instance simulating our external medical database
     chroma_client = chromadb.PersistentClient(path=HERMES_DB_PATH)
@@ -51,25 +55,26 @@ def get_knowledge_base(reset_database: bool = False):
     # Use standard OpenAI embeddings or alternative local open-source models
     embedding_fn = embedding_functions.DefaultEmbeddingFunction()
     collection = chroma_client.get_or_create_collection(
-        name="clinical_protocols", 
-        embedding_function=embedding_fn
+        name="clinical_protocols", embedding_function=embedding_fn
     )
     existing_count = collection.count()
     if existing_count > 0 and not reset_database:
-        logger.info(f"💾 Found existing collection with {existing_count} chunks. Skipping re-ingestion.")
+        logger.info(
+            f"💾 Found existing collection with {existing_count} chunks. Skipping re-ingestion."
+        )
         return collection
-    
+
     # Generate data for vector collection
     raw_texts = []
     metadata = []
     ids = []
 
     documents = os.listdir(DOCUMENTS_DIR)
-    i =0
+    i = 0
     for doc in documents:
         chunked_text_list = chunk_document(DOCUMENTS_DIR / doc)
         logger.info(f"📁 Generating vector collection data for document {doc}...")
-        
+
         for chunked_doc in chunked_text_list:
             # Remove bibliography from Spanish docs
             if "bibliografia" in chunked_doc.page_content.lower():
@@ -78,21 +83,18 @@ def get_knowledge_base(reset_database: bool = False):
             raw_texts.append(chunked_doc.page_content)
             # Retrieve and/or generate metadata
             meta = {"source": "hospital_protocols", "category": "post_op"}
-            if hasattr(doc, 'metadata') and doc.metadata:
+            if hasattr(doc, "metadata") and doc.metadata:
                 meta.update(doc.metadata)  # captures file name/page numbers safely
             metadata.append(meta)
             # Manually generate chunk id
             ids.append(f"protocol_chunk_{i}")
             i += 1
 
-    collection.add(
-        documents=raw_texts,
-        metadatas=metadata,
-        ids=ids
-    )
+    collection.add(documents=raw_texts, metadatas=metadata, ids=ids)
 
     logger.info("✅ Vector database populated successfully.")
     return collection
+
 
 if __name__ == "__main__":
     documents = os.listdir(DOCUMENTS_DIR)
