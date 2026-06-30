@@ -24,7 +24,7 @@ def enrich_with_rag(pre_report_content: str):
     Args:
         pre_report_content (str): The filled-out target schema with the added section.
     Returns:
-        final_enriched_report (str): The final enriched report to present.
+        enriched_report (str): The final enriched report to present.
         
     """
     # Setup our local mock vector base collection
@@ -49,7 +49,7 @@ def enrich_with_rag(pre_report_content: str):
         f"{pre_report_content}\n\n"
         f"### REFERENCE GROUNDING PROTOCOLS (RAG) ###\n"
         f"{retrieved_context}\n\n"
-        f"Please generate an updated Final Report appending a clear `Clinical Advisory & Next Steps' section."
+        f"Please generate an updated Final Report titled 'HERMES Pre-Visit Clinical Report' with only a clear `Clinical Advisory & Next Steps' section."
     )
 
     logger.info("🤖 HERMES Agent 2 is compiling enriched medical advisory guidelines...")
@@ -65,8 +65,8 @@ def enrich_with_rag(pre_report_content: str):
     # Return final report
     logger.info("✅ Successfully generated RAG-enriched final report!")
 
-    final_enriched_report = response.choices[0].message.content
-    return final_enriched_report
+    enriched_report = response.choices[0].message.content
+    return enriched_report
 
 
 if __name__ == "__main__":

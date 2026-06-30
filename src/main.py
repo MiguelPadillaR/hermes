@@ -48,7 +48,7 @@ def main(dataset_filepath: str = None, save_report_files: bool = False):
 
             logger.info(f"💾 Reports successfully compiled and saved to:\n\t'{AGENT1_OUTPUT_REPORT_FILEPATH}'\n\t'{AGENT2_OUTPUT_REPORT_FILEPATH}'")
     else:
-            logger.error(f"❌ Error: dataset context is not clinical-related!")
+            logger.error(f"❌ Error: dataset context is not clinically-related!")
         
 
 if __name__ == "__main__":

@@ -28,9 +28,11 @@ AGENT2_SYSTEM_PROMPT_FILEPATH = ASSETS_DIR / "agent2" / "SYSTEM.md"
 AGENT1_OUTPUT_REPORT_FILEPATH = REPORTS_DIR / "agent1_report.md"
 AGENT2_OUTPUT_REPORT_FILEPATH = REPORTS_DIR / "agent2_report.md"
 
+FINAL_PDF_FILEPATH = REPORTS_DIR / "full_clinical_report.pdf"
+
 # REPORTING
 REPORT_TEMPLATE = """# HERMES Pre-Visit Clinical Report
-
+---
 ## Core Biomarkers & Vital Signs
 - **Vein Pressure:** {vein_pressure}
 - **Heart Rate:** {heart_rate}
