@@ -8,7 +8,7 @@ from core.mapping import map_and_generate_pre_report
 from core.rag import enrich_with_rag
 from core.semantics import verify_dataset_clinical_context
 from config.config import FINAL_PDF_FILEPATH
-from utils.interface_utils import download_pdf_report
+from src.utils.app_utils import download_pdf_report
 
 logger = structlog.get_logger(__file__)
 
