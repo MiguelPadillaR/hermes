@@ -28,9 +28,11 @@ AGENT2_SYSTEM_PROMPT_FILEPATH = ASSETS_DIR / "agent2" / "SYSTEM.md"
 AGENT1_OUTPUT_REPORT_FILEPATH = REPORTS_DIR / "agent1_report.md"
 AGENT2_OUTPUT_REPORT_FILEPATH = REPORTS_DIR / "agent2_report.md"
 
+FINAL_PDF_FILEPATH = REPORTS_DIR / "full_clinical_report.pdf"
+
 # REPORTING
 REPORT_TEMPLATE = """# HERMES Pre-Visit Clinical Report
-
+---
 ## Core Biomarkers & Vital Signs
 - **Vein Pressure:** {vein_pressure}
 - **Heart Rate:** {heart_rate}
@@ -40,6 +42,16 @@ REPORT_TEMPLATE = """# HERMES Pre-Visit Clinical Report
 - **Pain Level:** {pain_level}
 - **Blood Sugar:** {blood_sugar}
 """
+# Set of clinical terms to search in dataframes to validate input dataframe context
+CLINICAL_ONTOLOGY_MAP = {
+    "heart_rate": ["hr", "heart rate", "pulse", "bpm", "h_r", "heart_rate", "pulsaciones"],
+    "vein_pressure": ["vp", "cvp", "vein pressure", "central venous pressure", "vein_pres", "presion_venosa"],
+    "temperature": ["temp", "temperature", "t_c", "temp_c", "temp_f", "celsius", "fahrenheit", "temperatura"],
+    "arterial_pressure": ["bp", "sbp", "dbp", "mbp", "abp", "arterial pressure", "blood pressure", "tension"],
+    "oxygen_saturation": ["spo2", "o2", "sat", "oxygen saturation", "sao2", "oximetry", "saturacion"],
+    "pain_level": ["pain", "pain level", "pain score", "cpot", "dolor"],
+    "blood_sugar": ["glucose", "blood sugar", "glu", "glycemia", "glucosa", "fingerstick"]
+}
 
 TARGET_UNITS = {
     "vein_pressure": "cmH2O",
