@@ -4,16 +4,26 @@ An automated, defensive clinical data processing and semantic reporting pipeline
 
 Rather than acting as a naive prompt wrapper, HeRMeS serves as a reliable middle-layer. It safely ingests patient vitals, verifies semantic domain boundaries at the system edge, aligns fragmented hospital schemas with standardized medical ontologies, and injects validated clinical guidelines through a specialized Retrieval-Augmented Generation (RAG) architecture.
 
+<center>
+
+  ![HeRMeS UI](src/assets/images/image.png)
+
+</center>
+
 ## 📒 Table of Contents
 - [📈 Technical Highlights \& Engineering Innovations](#-technical-highlights--engineering-innovations)
 - [🏗️ Architectural Topology \& Workflow](#️-architectural-topology--workflow)
 - [⚙️ Core Pipeline Sequence](#️-core-pipeline-sequence)
 - [📁 Project Directory Tree (Main files)](#-project-directory-tree-main-files)
 - [🛠️ Technologies \& Dependencies](#️-technologies--dependencies)
-- [⚙️ Installation \& Quickstart](#️-installation--quickstart)
+- [🚀 Installation \& Quickstart](#-installation--quickstart)
   - [1. Initialize the Repository \& Environment](#1-initialize-the-repository--environment)
   - [2. Configure Local Environment Variables](#2-configure-local-environment-variables)
   - [3. Run the System](#3-run-the-system)
+- [📦 Deployment (Docker)](#-deployment-docker)
+  - [Prerequisites](#prerequisites)
+  - [🗃️ Persistent Data Volumes](#️-persistent-data-volumes)
+  - [🧹 Stopping and Maintenance](#-stopping-and-maintenance)
 - [🧠 Strategic Design Decisions](#-strategic-design-decisions)
   - [1. Low-Temperature Deterministic Prompting](#1-low-temperature-deterministic-prompting)
   - [2. Edge Guardrailing over Core Text Validation](#2-edge-guardrailing-over-core-text-validation)
@@ -74,6 +84,8 @@ hermes/
 ├── utils/                      # Aux & helper functions and boilerplate code
 │
 ├── app.py                      # Interactive Streamlit Web Interface Dashboard
+├── docker-compose.yaml         # Docker container composition file
+├── Dockerfile                  # Docker image building file
 ├── main.py                     # Execution Entrypoint for Batch/CLI Pipelines
 ├── .env.template               # Template for Environment Ingestion Variables
 ├── pyproject.toml              # Python System Package Data
@@ -91,7 +103,7 @@ hermes/
 * **Tested Host Models**: `Hermes-4.3-36B` running over local `vLLM` clusters.
 * **Document Compilation Subsystem**: Markdown-PDF Parser
 
-## ⚙️ Installation & Quickstart
+## 🚀 Installation & Quickstart
 
 ### 1. Initialize the Repository & Environment
 Clone the code library and establish your Python execution boundary:
@@ -136,8 +148,6 @@ LLM_API_KEY="your_secure_infrastructure_access_token"
 LLM_MODEL_NAME="your_deployed_model_name"
 DEBUG_MODE="True"
 ```
->[!NOTE]
-> All LLM tests in HeRMeS were executed on a `Hermes-4.3-36B` model.
 
 ### 3. Run the System
 
@@ -151,6 +161,37 @@ python main.py
 **To launch the full interactive web application dashboard:**
 ```bash
 streamlit run app.py
+```
+
+## 📦 Deployment (Docker)
+
+HeRMeS is fully containerized using `Docker` and `Docker Compose` to ensure a deterministic runtime environment, persistent storage for the local `ChromaDB` vector database, and clean variable isolation.
+
+### Prerequisites
+- Make sure you have [`Docker`](https://docs.docker.com/get-docker/) and [`Docker Compose`](https://docs.docker.com/compose/install/) installed and running on your machine.
+- Have your `.env` file correctly configured and working (see [_2. Configure Local Environment Variables_](#2-configure-local-environment-variables)).
+
+2. **Build and Launch the Container** Compile the environment dependencies (optimized with `uv`) and spin up the multi-service layer in detached (`-d`, background) mode:
+   ```bash
+   docker build -t hermes . && docker compose up -d
+   ```
+
+3. **Access the Application** Once the container status is healthy, open your web browser and navigate to:
+   ```text
+   http://localhost:8501
+   ```
+
+### 🗃️ Persistent Data Volumes
+
+The Docker Compose configuration maps two crucial host volumes to guarantee data persistence across container rebuilds:
+* `./src/db` $\rightarrow$ Mounts the persistent local **`ChromaDB`** vector database storage.
+* `./src/reports` $\rightarrow$ Mounts the output destination where generated clinical PDF reports are compiled.
+
+### 🧹 Stopping and Maintenance
+
+To safely halt execution and tear down the virtual container boundaries without destroying your stored database volumes, run:
+```bash
+docker compose down
 ```
 
 ## 🧠 Strategic Design Decisions
