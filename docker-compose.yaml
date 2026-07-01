@@ -1,0 +1,14 @@
+services:
+  hermes-app:
+    build: .
+    container_name: hermes_container
+    ports:
+      - "8501:8501"
+    # Mount local directories so your vector DB and report outputs persist safely
+    volumes:
+      - ./src/db:/hermes_app/src/db
+      - ./src/reports:/hermes_app/src/reports
+    # Load your local environment variables (.env) automatically into the container
+    env_file:
+      - .env
+    restart: unless-stopped

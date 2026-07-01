@@ -8,7 +8,7 @@ from core.mapping import map_and_generate_pre_report
 from core.rag import enrich_with_rag
 from core.semantics import verify_dataset_clinical_context
 from config.config import FINAL_PDF_FILEPATH
-from src.utils.app_utils import download_pdf_report
+from utils.app_utils import download_pdf_report
 
 logger = structlog.get_logger(__file__)
 
@@ -19,7 +19,7 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-st.title("HERMES Clinical Reporting Pipeline")
+st.title("HERMES Clinical Reporting Pipeline", text_alignment="center")
 
 # Create two columns with custom width ratio
 # col1, col2 = st.columns([2, 1])  # Left column 2x wider than right
