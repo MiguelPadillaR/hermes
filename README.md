@@ -7,7 +7,7 @@ Rather than acting as a naive prompt wrapper, HeRMeS serves as a reliable middle
 <center>
 
   ![HeRMeS UI](src/assets/images/image.png)
-
+*HeRMeS App interface (Streamlit)*
 </center>
 
 ## 📒 Table of Contents
@@ -114,10 +114,11 @@ git clone https://github.com/MiguelPadillaR/hermes.git
 cd hermes
 ```
 Install all project dependencies:
-- With `puvip`:
+- With `uv`:
 ```bash
 # Create and activate a isolated virtual environment with all installed dependencies
 uv sync
+source .venv/bin/activate  # On Windows use: .venv\Scripts\activate
 ```
 - With `pip`:
 ```bash
